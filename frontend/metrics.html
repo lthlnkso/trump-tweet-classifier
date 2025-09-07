@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trump Tweet Classifier - Analytics Dashboard</title>
+    
+    <!-- Bootstrap and Chart.js -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .dashboard-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            margin: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.6);
+        }
+        
+        .dashboard-title {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500, #32cd32, #1e90ff, #ff1493);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleRainbow 3s ease infinite;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        
+        @keyframes titleRainbow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .stat-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 182, 193, 0.3));
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #ff6b6b;
+            margin: 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+            margin: 5px 0 0 0;
+        }
+        
+        .plot-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+        
+        .plot-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .plot-image {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .nav-pills .nav-link {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+            border-radius: 25px;
+            margin: 0 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+        }
+        
+        .last-updated {
+            color: #666;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="dashboard-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="dashboard-title mb-0">
+                    <i class="fas fa-chart-line"></i> Analytics Dashboard
+                </h1>
+                <button class="btn refresh-btn" onclick="location.reload()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            
+            <!-- Basic Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-number">{{basic_stats.total_submissions}}</div>
+                        <div class="stat-label">Total Submissions</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-number">{{basic_stats.unique_users}}</div>
+                        <div class="stat-label">Unique Users</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-number">{{basic_stats.trump_percentage}}%</div>
+                        <div class="stat-label">Trump-like Posts</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-number">{{basic_stats.agreement_rate}}%</div>
+                        <div class="stat-label">User Agreement</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Secondary Stats -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-number">{{basic_stats.today_submissions}}</div>
+                        <div class="stat-label">Today's Submissions</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-number">{{basic_stats.avg_confidence}}</div>
+                        <div class="stat-label">Avg Confidence</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-number">{{basic_stats.total_feedback}}</div>
+                        <div class="stat-label">Total Feedback</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-pills justify-content-center mb-4" id="analyticsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="submissions-tab" data-bs-toggle="pill" data-bs-target="#submissions" type="button" role="tab">
+                        <i class="fas fa-clock"></i> Submissions
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="levels-tab" data-bs-toggle="pill" data-bs-target="#levels" type="button" role="tab">
+                        <i class="fas fa-trophy"></i> Trump Levels
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="confidence-tab" data-bs-toggle="pill" data-bs-target="#confidence" type="button" role="tab">
+                        <i class="fas fa-chart-bar"></i> Confidence
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="geographic-tab" data-bs-toggle="pill" data-bs-target="#geographic" type="button" role="tab">
+                        <i class="fas fa-globe"></i> Geographic
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="feedback-tab" data-bs-toggle="pill" data-bs-target="#feedback" type="button" role="tab">
+                        <i class="fas fa-comments"></i> Feedback
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="sharing-tab" data-bs-toggle="pill" data-bs-target="#sharing" type="button" role="tab">
+                        <i class="fas fa-share-alt"></i> Sharing
+                    </button>
+                </li>
+            </ul>
+            
+            <!-- Tab Content -->
+            <div class="tab-content" id="analyticsTabContent">
+                <!-- Submissions Tab -->
+                <div class="tab-pane fade show active" id="submissions" role="tabpanel">
+                    <div class="plot-container">
+                        <h3 class="plot-title">
+                            <i class="fas fa-clock"></i> Submissions Over Time
+                        </h3>
+                        {% if plots.hourly_submissions %}
+                            <img src="data:image/png;base64,{{plots.hourly_submissions}}" alt="Hourly Submissions" class="plot-image">
+                        {% else %}
+                            <div class="no-data">
+                                <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                <p>No submission data available or error generating plot.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Trump Levels Tab -->
+                <div class="tab-pane fade" id="levels" role="tabpanel">
+                    <div class="plot-container">
+                        <h3 class="plot-title">
+                            <i class="fas fa-trophy"></i> Trump Level Distribution
+                        </h3>
+                        {% if plots.trump_levels %}
+                            <img src="data:image/png;base64,{{plots.trump_levels}}" alt="Trump Levels" class="plot-image">
+                        {% else %}
+                            <div class="no-data">
+                                <i class="fas fa-trophy fa-3x mb-3"></i>
+                                <p>No Trump level data available or error generating plot.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Confidence Tab -->
+                <div class="tab-pane fade" id="confidence" role="tabpanel">
+                    <div class="plot-container">
+                        <h3 class="plot-title">
+                            <i class="fas fa-chart-bar"></i> Confidence Analysis
+                        </h3>
+                        {% if plots.confidence_analysis %}
+                            <img src="data:image/png;base64,{{plots.confidence_analysis}}" alt="Confidence Analysis" class="plot-image">
+                        {% else %}
+                            <div class="no-data">
+                                <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                                <p>No confidence data available or error generating plot.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Geographic Tab -->
+                <div class="tab-pane fade" id="geographic" role="tabpanel">
+                    <div class="plot-container">
+                        <h3 class="plot-title">
+                            <i class="fas fa-globe"></i> Geographic Analysis
+                        </h3>
+                        {% if plots.geographic_analysis %}
+                            <img src="data:image/png;base64,{{plots.geographic_analysis}}" alt="Geographic Analysis" class="plot-image">
+                        {% else %}
+                            <div class="no-data">
+                                <i class="fas fa-globe fa-3x mb-3"></i>
+                                <p>Geographic data not available. GeoIP database required for this analysis.</p>
+                                <small>To enable geographic analysis, download and install the GeoLite2 database.</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Feedback Tab -->
+                <div class="tab-pane fade" id="feedback" role="tabpanel">
+                    <div class="plot-container">
+                        <h3 class="plot-title">
+                            <i class="fas fa-comments"></i> User Feedback Analysis
+                        </h3>
+                        {% if plots.feedback_analysis %}
+                            <img src="data:image/png;base64,{{plots.feedback_analysis}}" alt="Feedback Analysis" class="plot-image">
+                        {% else %}
+                            <div class="no-data">
+                                <i class="fas fa-comments fa-3x mb-3"></i>
+                                <p>No feedback data available or error generating plot.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Sharing Tab -->
+                <div class="tab-pane fade" id="sharing" role="tabpanel">
+                    <div class="plot-container">
+                        <h3 class="plot-title">
+                            <i class="fas fa-share-alt"></i> Sharing & Viral Metrics
+                        </h3>
+                        {% if plots.sharing_analysis %}
+                            <img src="data:image/png;base64,{{plots.sharing_analysis}}" alt="Sharing Analysis" class="plot-image">
+                        {% else %}
+                            <div class="no-data">
+                                <i class="fas fa-share-alt fa-3x mb-3"></i>
+                                <p>No sharing data available or error generating plot.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="last-updated">
+                <i class="fas fa-clock"></i> Last updated: {{basic_stats.last_updated}}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation -->
+    <div class="position-fixed bottom-0 end-0 m-3">
+        <a href="/" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #ff6b6b, #ffa500); border: none; border-radius: 25px;">
+            <i class="fas fa-home"></i> Back to Challenge
+        </a>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Auto-refresh every 5 minutes
+        setTimeout(function() {
+            location.reload();
+        }, 300000);
+        
+        // Add some interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            const statCards = document.querySelectorAll('.stat-card');
+            
+            statCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.background = 'linear-gradient(145deg, rgba(255, 107, 107, 0.1), rgba(255, 182, 193, 0.3))';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.background = 'linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 182, 193, 0.3))';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

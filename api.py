@@ -35,6 +35,7 @@ import uvicorn
 from database import db
 from logging_config import log_request, log_performance, log_database_operation, get_client_ip
 from image_generator import image_gen
+from analytics import TrumpAnalytics
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -325,6 +326,10 @@ async def lifespan(app: FastAPI):
         model_store['model'] = model
         model_store['model_path'] = model_path
         logger.info("Model loaded successfully at startup")
+        
+        # Initialize database and analytics
+        db.init_db()
+        logger.info("Database initialized successfully")
         
     except Exception as e:
         logger.error(f"Failed to load model at startup: {e}")
@@ -671,6 +676,76 @@ async def get_admin_stats():
     except Exception as e:
         logger.error(f"Error getting admin stats: {e}")
         raise HTTPException(status_code=500, detail="Failed to get statistics")
+
+@app.get("/metrics", response_class=HTMLResponse)
+async def metrics_dashboard(request: Request):
+    """
+    Comprehensive metrics dashboard with visualizations.
+    Note: In production, this should be protected with authentication.
+    """
+    try:
+        analytics = TrumpAnalytics()
+        
+        # Get basic statistics
+        basic_stats = analytics.get_basic_stats()
+        
+        # Generate all plots
+        plots = {}
+        
+        # Hourly submissions plot
+        try:
+            plots['hourly_submissions'] = analytics.get_hourly_submissions(days=7)
+        except Exception as e:
+            logger.warning(f"Failed to generate hourly submissions plot: {e}")
+            plots['hourly_submissions'] = None
+        
+        # Trump level distribution
+        try:
+            plots['trump_levels'] = analytics.get_trump_level_distribution()
+        except Exception as e:
+            logger.warning(f"Failed to generate Trump levels plot: {e}")
+            plots['trump_levels'] = None
+        
+        # Confidence analysis
+        try:
+            plots['confidence_analysis'] = analytics.get_confidence_analysis()
+        except Exception as e:
+            logger.warning(f"Failed to generate confidence analysis plot: {e}")
+            plots['confidence_analysis'] = None
+        
+        # Geographic analysis
+        try:
+            plots['geographic_analysis'] = analytics.get_geographic_analysis()
+        except Exception as e:
+            logger.warning(f"Failed to generate geographic analysis plot: {e}")
+            plots['geographic_analysis'] = None
+        
+        # Feedback analysis
+        try:
+            plots['feedback_analysis'] = analytics.get_feedback_analysis()
+        except Exception as e:
+            logger.warning(f"Failed to generate feedback analysis plot: {e}")
+            plots['feedback_analysis'] = None
+        
+        # Sharing analysis
+        try:
+            plots['sharing_analysis'] = analytics.get_sharing_analysis()
+        except Exception as e:
+            logger.warning(f"Failed to generate sharing analysis plot: {e}")
+            plots['sharing_analysis'] = None
+        
+        # Render the dashboard template
+        context = {
+            "request": request,
+            "basic_stats": basic_stats,
+            "plots": plots
+        }
+        
+        return templates.TemplateResponse("metrics.html", context)
+        
+    except Exception as e:
+        logger.error(f"Error generating metrics dashboard: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate metrics dashboard")
 
 if __name__ == "__main__":
     # Run the server

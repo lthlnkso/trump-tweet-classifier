@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
+    <!-- Favicon and App Icons -->
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="manifest" href="/static/site.webmanifest">
+    <meta name="theme-color" content="#ff6b6b">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{{og_description}}">
+    <meta name="keywords" content="Trump, Tweet, Challenge, AI, Classification, Social Media, Political, Writing Style">
+    <meta name="author" content="Trump Tweet Challenge">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{og_url}}">
+    
     <!-- Dynamic OpenGraph tags will be injected by server -->
     <meta property="og:title" content="{{og_title}}">
     <meta property="og:description" content="{{og_description}}">
@@ -11,12 +26,22 @@
     <meta property="og:url" content="{{og_url}}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Trump Tweet Challenge">
+    <meta property="og:locale" content="en_US">
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{og_title}}">
     <meta name="twitter:description" content="{{og_description}}">
     <meta name="twitter:image" content="{{og_image}}">
+    <meta name="twitter:creator" content="@TrumpTweetChallenge">
+    <meta name="twitter:site" content="@TrumpTweetChallenge">
+    
+    <!-- Facebook Meta -->
+    <meta property="fb:app_id" content="your_facebook_app_id">
+    
+    <!-- LinkedIn Meta -->
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     
     <title>{{page_title}}</title>
     
@@ -228,6 +253,17 @@
             50% { transform: scale(1.05); }
         }
         
+        @keyframes challengePulse {
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 15px 30px rgba(255, 107, 107, 0.3);
+            }
+            50% { 
+                transform: scale(1.02); 
+                box-shadow: 0 20px 40px rgba(255, 107, 107, 0.4);
+            }
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .share-container {
@@ -332,6 +368,40 @@
                 {{trump_level}}
             </div>
             
+            <!-- Prominent Try Challenge Section -->
+            <div class="try-yourself-prominent" style="
+                background: linear-gradient(135deg, #ff6b6b, #ffa500);
+                border-radius: 20px;
+                padding: 25px;
+                margin: 25px 0;
+                text-align: center;
+                box-shadow: 0 15px 30px rgba(255, 107, 107, 0.3);
+                border: 3px solid rgba(255, 255, 255, 0.8);
+                animation: challengePulse 2s ease-in-out infinite;
+            ">
+                <h3 style="color: white; font-weight: 900; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                    <i class="fas fa-fire"></i> Think You Can Beat This Score? <i class="fas fa-fire"></i>
+                </h3>
+                <p style="color: rgba(255,255,255,0.95); margin-bottom: 20px; font-size: 1.1rem;">
+                    Challenge yourself and see if you can post more like Trump!
+                </p>
+                <a href="/" class="btn" style="
+                    background: white;
+                    color: #ff6b6b;
+                    font-weight: bold;
+                    font-size: 1.2rem;
+                    padding: 15px 30px;
+                    border-radius: 50px;
+                    text-decoration: none;
+                    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+                    transition: all 0.3s ease;
+                    display: inline-block;
+                " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 12px 25px rgba(0,0,0,0.3)'" 
+                   onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)'">
+                    <i class="fas fa-rocket"></i> TAKE THE CHALLENGE!
+                </a>
+            </div>
+            
             <div class="original-text">
                 "{{text_content}}"
             </div>
@@ -349,34 +419,6 @@
                 </div>
             </div>
             
-            <div class="share-buttons">
-                <h5 style="color: #333; margin-bottom: 20px;">
-                    <i class="fas fa-share-alt"></i> Share Your Results!
-                </h5>
-                
-                <button class="btn share-btn btn-copy" onclick="copyShareLink()">
-                    <i class="fas fa-copy"></i> Copy Link
-                </button>
-                
-                <a href="{{twitter_share_url}}" target="_blank" class="btn share-btn btn-twitter">
-                    <i class="fab fa-twitter"></i> Tweet
-                </a>
-                
-                <a href="{{facebook_share_url}}" target="_blank" class="btn share-btn btn-facebook">
-                    <i class="fab fa-facebook-f"></i> Share
-                </a>
-                
-                <div class="copy-success" id="copySuccess">
-                    <i class="fas fa-check"></i> Link copied to clipboard!
-                </div>
-            </div>
-            
-            <div class="try-yourself">
-                <h5 style="color: #333; margin-bottom: 15px;">Think you can do better?</h5>
-                <a href="/" class="btn-challenge">
-                    <i class="fas fa-rocket"></i> Take the Challenge!
-                </a>
-            </div>
             
             <div class="stats-footer">
                 Created {{created_date}} • Join thousands testing their Trump tweeting skills!
