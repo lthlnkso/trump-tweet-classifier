@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Like Trump Challenge</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        html {
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        /* Hide scrollbars */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 25%, #fecfef 50%, #a8edea 75%, #fed6e3 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        
+        .main-content {
+            width: 100%;
+            max-width: 800px;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        
+        .content-wrapper {
+            width: 100%;
+            max-height: calc(100vh - 20px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+        
+        .challenge-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 182, 193, 0.3));
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(255, 105, 180, 0.3), 0 0 30px rgba(173, 216, 230, 0.2);
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            animation: cardFloat 6s ease-in-out infinite;
+            height: fit-content;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        
+        .title {
+            background: linear-gradient(45deg, #ff6b9d, #c44569, #f8b500, #ff6b9d);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleRainbow 4s ease infinite, titleBounce 2s ease-in-out infinite;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: none;
+            font-size: 2.5rem;
+        }
+        
+        @media (max-height: 800px) {
+            .title {
+                font-size: 2rem;
+                margin-bottom: 15px;
+            }
+            .challenge-card {
+                padding: 20px;
+            }
+            .trump-challenge-img {
+                max-width: 150px;
+            }
+        }
+        
+        .trump-meter {
+            background: linear-gradient(90deg, #ff4757, #ffa502, #2ed573);
+            height: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            transition: width 0.8s ease-in-out;
+            position: relative;
+        }
+        
+        .meter-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            z-index: 10;
+        }
+        
+        .result-card {
+            margin-top: 30px;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .trump-level {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .certified { color: #f1c40f; }
+        .don-jr { color: #e74c3c; }
+        .eric { color: #9b59b6; }
+        .tiffany { color: #e91e63; }
+        .supporter { color: #3498db; }
+        .curious { color: #95a5a6; }
+        .not-trump { color: #34495e; }
+        
+        .tweet-input {
+            border-radius: 20px;
+            border: 2px solid rgba(255, 182, 193, 0.6);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 240, 245, 0.8));
+            padding: 20px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .tweet-input:focus {
+            border-color: rgba(255, 105, 180, 0.8);
+            box-shadow: 0 0 20px rgba(255, 182, 193, 0.5), 0 0 40px rgba(173, 216, 230, 0.3);
+            outline: none;
+            transform: scale(1.02);
+        }
+        
+        .submit-btn {
+            background: linear-gradient(45deg, #ff7eb3, #ff65a3, #ff9a9e, #fad0c4);
+            background-size: 300% 300%;
+            animation: buttonGlow 3s ease infinite;
+            border: none;
+            border-radius: 30px;
+            padding: 15px 35px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(255, 126, 179, 0.4);
+            transform: perspective(1000px) rotateX(0deg);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px) perspective(1000px) rotateX(-5deg) scale(1.05);
+            box-shadow: 0 15px 35px rgba(255, 126, 179, 0.6);
+            animation: buttonGlow 1.5s ease infinite;
+        }
+        
+        .loading-spinner {
+            display: none;
+        }
+        
+        .examples {
+            background: linear-gradient(145deg, rgba(255, 182, 193, 0.3), rgba(173, 216, 230, 0.3));
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: examplesFloat 8s ease-in-out infinite;
+        }
+        
+        .example-tweet {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 182, 193, 0.4));
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 192, 203, 0.5);
+            animation: tweetPulse 4s ease-in-out infinite;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-height: 800px) {
+            .examples {
+                padding: 15px;
+                margin-top: 10px;
+            }
+            .example-tweet {
+                padding: 8px 10px;
+                margin: 6px 0;
+                font-size: 0.8rem;
+            }
+        }
+        
+        .example-tweet:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 105, 180, 0.5));
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(255, 182, 193, 0.4);
+        }
+        
+        /* Trump Challenge Image */
+        .trump-challenge-img {
+            max-width: 200px;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(255, 182, 193, 0.6);
+            transition: all 0.3s ease;
+            animation: imageFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(173, 216, 230, 0.5));
+            /* Force a background behind transparent areas */
+            background: linear-gradient(135deg, rgba(255, 182, 193, 0.8), rgba(173, 216, 230, 0.8));
+            background-blend-mode: multiply;
+            mix-blend-mode: normal;
+        }
+        
+        .trump-challenge-img:hover {
+            transform: scale(1.08) rotate(3deg);
+            filter: drop-shadow(0 0 30px rgba(255, 105, 180, 0.8));
+            background: linear-gradient(135deg, rgba(255, 105, 180, 0.9), rgba(255, 182, 193, 0.9));
+        }
+        
+        /* Level Images */
+        .level-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .level-img {
+            max-width: 200px;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(255, 215, 0, 0.5);
+            border: 3px solid #ffd700;
+            animation: levelImageAppear 1s ease-out;
+            filter: drop-shadow(0 0 20px rgba(255, 182, 193, 0.6));
+            position: relative;
+            z-index: 2;
+            /* Force background fill for transparent areas */
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.7), rgba(255, 182, 193, 0.7));
+            background-blend-mode: multiply;
+        }
+        
+        /* Add gradient background behind modal images */
+        .level-image-container::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2), rgba(255, 182, 193, 0.2), transparent);
+            border-radius: 50%;
+            z-index: 1;
+            animation: backgroundPulse 3s ease-in-out infinite;
+        }
+        
+        /* Modal Styles */
+        .results-modal {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 25%, #a8edea 50%, #fed6e3 100%);
+            background-size: 300% 300%;
+            animation: modalGradient 6s ease infinite;
+            border-radius: 25px;
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            color: white;
+            box-shadow: 0 30px 60px rgba(255, 105, 180, 0.4);
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+        
+        /* Ensure modal dialog never exceeds viewport */
+        .modal-dialog {
+            max-height: 100vh;
+            max-width: 95vw;
+            margin: 2.5vh auto;
+        }
+        
+        /* Constrain modal content to viewport */
+        .modal-content {
+            max-height: 95vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Make modal body scrollable if needed */
+        .modal-body {
+            overflow-y: auto;
+            flex-grow: 1;
+            max-height: calc(95vh - 150px); /* Account for header/footer */
+        }
+        
+        .trump-score-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+        
+        .score-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff7eb3, #ff9a9e, #ffd93d, #6bcf7f);
+            background-size: 300% 300%;
+            animation: scoreEnter 1s ease-out, scoreRainbow 4s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(255, 126, 179, 0.5);
+            border: 4px solid rgba(255, 255, 255, 0.8);
+        }
+        
+        .score-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            line-height: 1;
+        }
+        
+        .score-percentage {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            position: absolute;
+            bottom: 35px;
+            right: 20px;
+        }
+        
+        .trump-level-big {
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 15px 25px;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            animation: levelSlideIn 1.5s ease-out;
+        }
+        
+        .trump-meter-modern {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .meter-fill-modern {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4757, #ffa502, #2ed573);
+            border-radius: 10px;
+            transition: width 2s ease-in-out;
+            position: relative;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .result-details {
+            margin-top: 30px;
+        }
+        
+        .detail-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .detail-box h6 {
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .detail-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: 0;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Feedback Section Styles */
+        .feedback-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            animation: feedbackAppear 0.5s ease-out;
+        }
+        
+        .feedback-title {
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-weight: bold;
+        }
+        
+        .feedback-btn {
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 15px;
+            padding: 12px 8px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feedback-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .feedback-btn:hover::before {
+            left: 100%;
+        }
+        
+        .feedback-agree {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+        
+        .feedback-agree:hover {
+            background: linear-gradient(135deg, #20c997, #17a2b8);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .feedback-disagree {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            color: white;
+        }
+        
+        .feedback-disagree:hover {
+            background: linear-gradient(135deg, #fd7e14, #ffc107);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.4);
+        }
+        
+        .feedback-textarea {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 10px;
+            color: #333;
+            resize: none;
+            font-size: 14px;
+        }
+        
+        .feedback-textarea:focus {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            outline: none;
+        }
+        
+        .feedback-submit-btn {
+            background: linear-gradient(135deg, #007bff, #6f42c1);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .feedback-submit-btn:hover {
+            background: linear-gradient(135deg, #6f42c1, #e83e8c);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.4);
+        }
+        
+        .feedback-skip-btn {
+            background: rgba(108, 117, 125, 0.8);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px 16px;
+            margin-left: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .feedback-skip-btn:hover {
+            background: rgba(108, 117, 125, 1);
+            transform: translateY(-1px);
+        }
+        
+        .feedback-success {
+            animation: feedbackSuccess 0.5s ease-out;
+        }
+        
+        /* Share Button Styles */
+        .share-result-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .share-result-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .share-result-btn:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+            color: white;
+        }
+        
+        .share-result-btn:hover::before {
+            left: 100%;
+        }
+        
+        .share-result-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .share-result-btn:disabled::before {
+            display: none;
+        }
+        
+        /* Copy Link Button Styles */
+        .copy-link-btn {
+            background: linear-gradient(135deg, #17a2b8, #007bff);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .copy-link-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .copy-link-btn:hover {
+            background: linear-gradient(135deg, #007bff, #6f42c1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(23, 162, 184, 0.5);
+            color: white;
+        }
+        
+        .copy-link-btn:hover::before {
+            left: 100%;
+        }
+        
+        .copy-link-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Two-Column Modal Layout */
+        .modal-content-layout {
+            min-height: 400px;
+        }
+        
+        .results-column {
+            border-right: 2px solid rgba(255, 255, 255, 0.2);
+            padding-right: 20px;
+        }
+        
+        .tweet-column {
+            padding-left: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-tweet-display {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            backdrop-filter: blur(10px);
+            animation: tweetDisplayFloat 3s ease-in-out infinite;
+        }
+        
+        .tweet-title {
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .tweet-text-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+        }
+        
+        .tweet-text {
+            color: #333;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin: 0;
+            font-style: italic;
+            word-wrap: break-word;
+        }
+        
+        .tweet-stats {
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        /* Compact Styles for Results Column */
+        .level-img-compact {
+            max-width: 120px !important;
+            max-height: 120px !important;
+        }
+        
+        .score-circle-compact {
+            width: 120px !important;
+            height: 120px !important;
+            font-size: 2.5rem !important;
+        }
+        
+        .score-circle-compact .score-number {
+            font-size: 2.5rem !important;
+        }
+        
+        .score-circle-compact .score-percentage {
+            font-size: 1.2rem !important;
+        }
+        
+        .trump-level-compact {
+            font-size: 1.4rem !important;
+        }
+        
+        .trump-meter-compact {
+            height: 25px !important;
+            margin: 10px 0 !important;
+        }
+        
+        .detail-box-compact {
+            padding: 10px !important;
+        }
+        
+        .detail-box-compact h6 {
+            font-size: 0.9rem !important;
+            margin-bottom: 5px !important;
+        }
+        
+        .detail-box-compact .detail-value {
+            font-size: 1.1rem !important;
+            padding: 6px 10px !important;
+        }
+        
+        /* Mobile Responsive - Stack vertically on small screens */
+        @media (max-width: 991px) {
+            .results-column {
+                border-right: none;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+                padding-right: 15px;
+                padding-bottom: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .tweet-column {
+                padding-left: 15px;
+            }
+            
+            .modal-content-layout {
+                min-height: auto;
+            }
+            
+            .user-tweet-display {
+                margin-top: 20px;
+            }
+        }
+        
+        @keyframes tweetDisplayFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        /* Animations */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-5px) rotate(0.5deg); }
+            66% { transform: translateY(-3px) rotate(-0.5deg); }
+        }
+        
+        @keyframes titleRainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes titleBounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes buttonGlow {
+            0% { background-position: 0% 50%; box-shadow: 0 8px 25px rgba(255, 126, 179, 0.4); }
+            50% { background-position: 100% 50%; box-shadow: 0 8px 25px rgba(255, 105, 180, 0.6); }
+            100% { background-position: 0% 50%; box-shadow: 0 8px 25px rgba(255, 126, 179, 0.4); }
+        }
+        
+        @keyframes imageFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(1deg); }
+        }
+        
+        @keyframes modalGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes scoreRainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes examplesFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes tweetPulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.01); opacity: 1; }
+        }
+        
+        @keyframes backgroundPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.6; }
+        }
+        
+        @keyframes titleGlow {
+            from { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
+            to { text-shadow: 2px 2px 20px rgba(255, 215, 0, 0.8); }
+        }
+        
+        @keyframes scoreEnter {
+            from {
+                transform: scale(0) rotate(-180deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes levelSlideIn {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fireworks {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes levelImageAppear {
+            from {
+                transform: scale(0) rotate(-360deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+        
+        .celebration {
+            animation: fireworks 0.6s ease-in-out 3;
+        }
+        
+        /* Fun floating sparkles */
+        .sparkle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        .sparkle::before {
+            content: '✨';
+            font-size: 20px;
+            animation: sparkleFloat 4s linear infinite;
+        }
+        
+        @keyframes sparkleFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes feedbackAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes feedbackSuccess {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <div class="content-wrapper">
+                <div class="challenge-card">
+                    <!-- Trump Challenge Image -->
+                    <div class="text-center mb-4">
+                        <img src="/static/images/TrumpChallenge.png" alt="Trump Challenge" class="trump-challenge-img">
+                    </div>
+                    
+                    <h1 class="title">
+                        <i class="fas fa-flag-usa"></i>
+                        Post Like Trump
+                        <i class="fas fa-flag-usa"></i>
+                    </h1>
+                    
+                    <p class="text-center lead mb-4">
+                        Can you write like 45-47?
+                    </p>
+                    
+                    <form id="trumpForm">
+                        <div class="mb-3">
+                            <label for="tweetText" class="form-label">
+                                <strong>Your Tweet:</strong>
+                            </label>
+                            <textarea 
+                                class="form-control tweet-input" 
+                                id="tweetText" 
+                                placeholder="Type your tweet here... Remember: ALL CAPS and exclamation points help!"
+                                maxlength="600"
+                                required
+                            ></textarea>
+                            <div class="form-text">
+                                <span id="charCount">0</span>/600 characters
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-danger submit-btn">
+                                <span class="submit-text">
+                                    <i class="fas fa-paper-plane"></i>
+                                    POST!
+                                </span>
+                                <span class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    POSTING...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="examples">
+                        <h5><i class="fas fa-lightbulb"></i> Need inspiration? Try these!</h5>
+                        <div class="example-tweet" onclick="useExample('The media just complained that you killed people without trial!')">
+                            The media just complained that you killed people without trial!
+                        </div>
+                        <div class="example-tweet" onclick="useExample('Your tariffs are killing domestic manufacturing... Just as planned.')">
+                            Your tariffs are killing domestic manufacturing... Just as planned.
+                        </div>
+                        <div class="example-tweet" onclick="useExample('You\'ve just accepted a bribe, that\'s actually a good thing.')">
+                            You've just accepted a bribe, that's actually a good thing.
+                        </div>
+                        <div class="example-tweet" onclick="useExample('They say you can\'t send people to prison without trial.')">
+                            They say you can't send people to prison without trial.
+                        </div>
+                        <div class="example-tweet" onclick="useExample('I had a nice lunch today. The sandwich was pretty good.')">
+                            Another embarassing jobs report.  Good thing the data is fake!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                
+        <!-- Results Modal -->
+                <div class="modal fade" id="resultsModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content results-modal">
+                            <div class="modal-header border-0 text-center">
+                                <h2 class="modal-title w-100 trump-score-title">
+                                    🎯 YOUR TRUMP SCORE 🎯
+                                </h2>
+                            </div>
+                            <div class="modal-body p-4">
+                                <!-- Responsive Layout: Two columns on larger screens -->
+                                <div class="row modal-content-layout">
+                                    <!-- Left Column: Results and Score -->
+                                    <div class="col-lg-6 results-column text-center">
+                                        <!-- Level-specific Images (hidden by default) -->
+                                        <div id="certifiedTrumpImage" class="level-image-container mb-3" style="display: none;">
+                                            <img src="/static/images/CERTIFIEDTrump.png" alt="Certified Trump" class="level-img level-img-compact">
+                                        </div>
+                                        
+                                        <div id="donJrImage" class="level-image-container mb-3" style="display: none;">
+                                            <img src="/static/images/don-jr.png" alt="Donald Trump Jr" class="level-img level-img-compact">
+                                        </div>
+                                        
+                                        <div id="ericTrumpImage" class="level-image-container mb-3" style="display: none;">
+                                            <img src="/static/images/eric-trump.png" alt="Eric Trump" class="level-img level-img-compact">
+                                        </div>
+                                        
+                                        <div id="tiffanyTrumpImage" class="level-image-container mb-3" style="display: none;">
+                                            <img src="/static/images/tiffany-trump.png" alt="Tiffany Trump" class="level-img level-img-compact">
+                                        </div>
+                                        
+                                        <div id="trumpSupporterImage" class="level-image-container mb-3" style="display: none;">
+                                            <img src="/static/images/trump-supporter.png" alt="Trump Supporter" class="level-img level-img-compact">
+                                        </div>
+                                        
+                                        <div id="trumpThumbsUpImage" class="level-image-container mb-3" style="display: none;">
+                                            <img src="/static/images/trump-thumbs-up.png" alt="Thumbs Up" class="level-img level-img-compact">
+                                        </div>
+                                        
+                                        <div id="trumpDisappointedImage" class="level-image-container mb-3" style="display: none;">
+                                            <img src="/static/images/trump-disappointed.png" alt="Trump Disappointed" class="level-img level-img-compact">
+                                        </div>
+                                        
+                                        <!-- Compact Score Display -->
+                                        <div class="score-display mb-3">
+                                            <div class="score-circle score-circle-compact">
+                                                <div class="score-number" id="scoreNumber">0</div>
+                                                <div class="score-percentage">%</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Trump Level with Animation -->
+                                        <div class="trump-level-display mb-3">
+                                            <div class="trump-level-big trump-level-compact" id="trumpLevelBig"></div>
+                                        </div>
+                                        
+                                        <!-- Animated Trump Meter -->
+                                        <div class="trump-meter-container mb-3">
+                                            <div class="trump-meter-modern trump-meter-compact">
+                                                <div class="meter-fill-modern" id="meterFillModern" style="width: 0%"></div>
+                                                <div class="meter-labels">
+                                                    <span class="meter-label-left">Not Trump</span>
+                                                    <span class="meter-label-right">Very Trump</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Details Row -->
+                                        <div class="row result-details mb-3">
+                                            <div class="col-6">
+                                                <div class="detail-box detail-box-compact">
+                                                    <h6>Classification</h6>
+                                                    <p id="predictionModal" class="detail-value"></p>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="detail-box detail-box-compact">
+                                                    <h6>Confidence</h6>
+                                                    <p id="confidenceModal" class="detail-value"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Right Column: User's Tweet Text -->
+                                    <div class="col-lg-6 tweet-column">
+                                        <div class="user-tweet-display">
+                                            <h5 class="tweet-title">
+                                                <i class="fas fa-quote-left"></i> Your Tweet <i class="fas fa-quote-right"></i>
+                                            </h5>
+                                            <div class="tweet-text-container">
+                                                <p id="userTweetText" class="tweet-text"></p>
+                                            </div>
+                                            <div class="tweet-stats">
+                                                <small id="tweetLength" class="text-muted"></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Feedback Section -->
+                                <div class="feedback-section mt-4 p-3" id="feedbackSection">
+                                    <h5 class="feedback-title text-center mb-3">
+                                        <i class="fas fa-comment-dots"></i> What do you think?
+                                    </h5>
+                                    
+                                    <div class="feedback-buttons mb-3">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <button type="button" class="btn feedback-btn feedback-agree w-100" onclick="submitFeedback(true)">
+                                                    <i class="fas fa-thumbs-up"></i>
+                                                    <span>Spot On!</span>
+                                                </button>
+                                            </div>
+                                            <div class="col-6">
+                                                <button type="button" class="btn feedback-btn feedback-disagree w-100" onclick="submitFeedback(false)">
+                                                    <i class="fas fa-thumbs-down"></i>
+                                                    <span>Nah...</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="feedback-message-section" id="feedbackMessageSection" style="display: none;">
+                                        <textarea 
+                                            id="feedbackMessage" 
+                                            class="form-control feedback-textarea" 
+                                            placeholder="Tell us why... (optional)"
+                                            maxlength="500"
+                                            rows="3"
+                                        ></textarea>
+                                        <div class="feedback-actions mt-2">
+                                            <button type="button" class="btn feedback-submit-btn" onclick="submitFeedbackWithMessage()">
+                                                <i class="fas fa-paper-plane"></i> Send Feedback
+                                            </button>
+                                            <button type="button" class="btn feedback-skip-btn" onclick="skipFeedbackMessage()">
+                                                Skip
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="feedback-success" id="feedbackSuccess" style="display: none;">
+                                        <div class="text-center">
+                                            <i class="fas fa-check-circle text-success" style="font-size: 2rem;"></i>
+                                            <p class="mt-2 mb-0">Thanks for your feedback! 🎉</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 justify-content-center">
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                    <button type="button" class="btn share-result-btn" onclick="shareResult()">
+                                        <i class="fas fa-share-alt"></i> Share My Score!
+                                    </button>
+                                    <button type="button" class="btn copy-link-btn" onclick="quickCopyLink()" style="display: none;">
+                                        <i class="fas fa-copy"></i> Copy Link
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-lg" data-bs-dismiss="modal" onclick="resetForm()">
+                                        <i class="fas fa-thumbs-up"></i> TREMENDOUS!
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>

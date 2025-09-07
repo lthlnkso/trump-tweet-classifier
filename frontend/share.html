@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Dynamic OpenGraph tags will be injected by server -->
+    <meta property="og:title" content="{{og_title}}">
+    <meta property="og:description" content="{{og_description}}">
+    <meta property="og:image" content="{{og_image}}">
+    <meta property="og:url" content="{{og_url}}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Trump Tweet Challenge">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{og_title}}">
+    <meta name="twitter:description" content="{{og_description}}">
+    <meta name="twitter:image" content="{{og_image}}">
+    
+    <title>{{page_title}}</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .share-container {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2vh 2vw;
+            box-sizing: border-box;
+        }
+        
+        .share-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 3vh 4vw;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            max-width: min(600px, 90vw);
+            max-height: 96vh;
+            width: 100%;
+            text-align: center;
+            animation: cardFloat 6s ease-in-out infinite;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        
+        .share-title {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff6b6b, #ffa500, #32cd32, #1e90ff, #ff1493);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleRainbow 3s ease infinite;
+            margin-bottom: clamp(15px, 3vh, 25px);
+        }
+        
+        .score-display {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 900;
+            color: #ffd700;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            margin: clamp(15px, 3vh, 25px) 0;
+            animation: scoreGlow 2s ease-in-out infinite alternate;
+        }
+        
+        .trump-level-display {
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            font-weight: bold;
+            color: #333;
+            margin: clamp(15px, 3vh, 25px) 0;
+            padding: clamp(10px, 2vh, 18px);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 105, 180, 0.2));
+            border-radius: 15px;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+        }
+        
+        .original-text {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .share-buttons {
+            margin-top: 30px;
+        }
+        
+        .share-btn {
+            margin: 10px;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1.1rem;
+        }
+        
+        .btn-copy {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+            color: white;
+        }
+        
+        .btn-twitter {
+            background: #1da1f2;
+            color: white;
+        }
+        
+        .btn-twitter:hover {
+            background: #0d8bd9;
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .btn-facebook {
+            background: #4267B2;
+            color: white;
+        }
+        
+        .btn-facebook:hover {
+            background: #365899;
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .try-yourself {
+            margin-top: 40px;
+        }
+        
+        .btn-challenge {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            font-size: 1.2rem;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+            animation: buttonPulse 2s ease-in-out infinite;
+        }
+        
+        .btn-challenge:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.5);
+            color: white;
+        }
+        
+        .copy-success {
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .copy-success.show {
+            opacity: 1;
+        }
+        
+        .stats-footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        /* Animations */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(0.5deg); }
+            66% { transform: translateY(-5px) rotate(-0.5deg); }
+        }
+        
+        @keyframes titleRainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes scoreGlow {
+            from { text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3); }
+            to { text-shadow: 3px 3px 20px rgba(255, 215, 0, 0.8); }
+        }
+        
+        @keyframes buttonPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .share-container {
+                padding: 1vh 1vw;
+            }
+            
+            .share-card {
+                padding: 2vh 3vw;
+                max-height: 98vh;
+                border-radius: 15px;
+            }
+            
+            .share-title {
+                font-size: max(1.8rem, 4vw);
+                margin-bottom: 1.5vh;
+            }
+            
+            .score-display {
+                font-size: max(2.5rem, 8vw);
+                margin: 1.5vh 0;
+            }
+            
+            .trump-level-display {
+                font-size: max(1.2rem, 3.5vw);
+                padding: 1vh;
+                margin: 1.5vh 0;
+            }
+            
+            .original-text {
+                padding: 1.5vh;
+                margin: 1.5vh 0;
+                font-size: max(0.9rem, 3vw);
+            }
+            
+            .share-buttons {
+                margin-top: 2vh;
+            }
+            
+            .share-btn {
+                margin: 0.5vh;
+                padding: 1vh 2vw;
+                font-size: max(0.9rem, 3vw);
+            }
+            
+            .try-yourself {
+                margin-top: 2vh;
+            }
+            
+            .btn-challenge {
+                font-size: max(1rem, 3.5vw);
+                padding: 1.5vh 3vw;
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .share-card {
+                padding: 1vh 2vw;
+            }
+            
+            .share-title {
+                font-size: 1.5rem;
+                margin-bottom: 1vh;
+            }
+            
+            .score-display {
+                font-size: 2rem;
+                margin: 1vh 0;
+            }
+            
+            .trump-level-display {
+                font-size: 1rem;
+                padding: 0.5vh;
+                margin: 1vh 0;
+            }
+            
+            .original-text {
+                padding: 1vh;
+                margin: 1vh 0;
+                font-size: 0.8rem;
+            }
+            
+            .stats-footer {
+                margin-top: 1vh;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="share-container">
+        <div class="share-card">
+            <!-- Trump Challenge Logo/Image -->
+            <div class="mb-4">
+                <img src="/static/images/TrumpChallenge.png" alt="Trump Challenge" style="max-width: 150px; border-radius: 15px; animation: imageFloat 3s ease-in-out infinite;">
+            </div>
+            
+            <h1 class="share-title">🎯 Trump Score Reveal!</h1>
+            
+            <div class="score-display">{{trump_score}}%</div>
+            
+            <div class="trump-level-display">
+                {{trump_level}}
+            </div>
+            
+            <div class="original-text">
+                "{{text_content}}"
+            </div>
+            
+            <div class="result-details">
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Classification:</strong><br>
+                        <span style="color: {{prediction_color}};">{{classification}}</span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Confidence:</strong><br>
+                        <span style="color: #007bff;">{{confidence}}%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="share-buttons">
+                <h5 style="color: #333; margin-bottom: 20px;">
+                    <i class="fas fa-share-alt"></i> Share Your Results!
+                </h5>
+                
+                <button class="btn share-btn btn-copy" onclick="copyShareLink()">
+                    <i class="fas fa-copy"></i> Copy Link
+                </button>
+                
+                <a href="{{twitter_share_url}}" target="_blank" class="btn share-btn btn-twitter">
+                    <i class="fab fa-twitter"></i> Tweet
+                </a>
+                
+                <a href="{{facebook_share_url}}" target="_blank" class="btn share-btn btn-facebook">
+                    <i class="fab fa-facebook-f"></i> Share
+                </a>
+                
+                <div class="copy-success" id="copySuccess">
+                    <i class="fas fa-check"></i> Link copied to clipboard!
+                </div>
+            </div>
+            
+            <div class="try-yourself">
+                <h5 style="color: #333; margin-bottom: 15px;">Think you can do better?</h5>
+                <a href="/" class="btn-challenge">
+                    <i class="fas fa-rocket"></i> Take the Challenge!
+                </a>
+            </div>
+            
+            <div class="stats-footer">
+                Created {{created_date}} • Join thousands testing their Trump tweeting skills!
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Floating animation for image
+        const img = document.querySelector('img');
+        if (img) {
+            img.style.animation = 'imageFloat 3s ease-in-out infinite';
+        }
+        
+        // Copy share link functionality
+        function copyShareLink() {
+            const url = window.location.href;
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showCopySuccess();
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    fallbackCopyTextToClipboard(url);
+                });
+            } else {
+                fallbackCopyTextToClipboard(url);
+            }
+        }
+        
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess();
+                }
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        function showCopySuccess() {
+            const successMsg = document.getElementById('copySuccess');
+            successMsg.classList.add('show');
+            
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Add some sparkle effects
+        @keyframes imageFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        
+        console.log('🎯 Share page loaded successfully!');
+    </script>
+</body>
+</html>
