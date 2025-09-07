@@ -641,6 +641,30 @@ uvicorn api:app --reload --host 0.0.0.0 --port 8000
 ./start_api.sh
 ```
 
+**⚠️ Important: Long-Running Commands**:
+```bash
+# WRONG: Running long-running commands directly (blocks terminal)
+python api.py  # This will hang the terminal
+
+# CORRECT: Use background execution for servers
+python api.py &  # Run in background
+nohup python api.py &  # Run in background, persist after logout
+
+# CORRECT: Use proper startup scripts
+./start_app.sh  # Proper script that manages processes
+
+# CORRECT: For development, use uvicorn with proper flags
+uvicorn api:app --reload  # Auto-restarts on code changes
+
+# To check if background processes are running:
+ps aux | grep python  # Check running Python processes
+curl http://localhost:8000/health  # Test if API is responding
+
+# To stop background processes:
+pkill -f "python api.py"  # Kill by process name
+kill PID  # Kill by process ID (get PID from ps aux)
+```
+
 **Database Operations**:
 ```bash
 # View database
@@ -672,6 +696,40 @@ python3 train_classifier.py --classifier logistic --no-features
 
 # Compare results
 python3 compare_models.py
+```
+
+**Model Configuration**:
+```bash
+# By default, the API uses this model path (hardcoded in api.py):
+DEFAULT_MODEL="models/trump_classifier_20250907_082520.joblib"
+
+# To use a different model, set the MODEL_PATH environment variable:
+export MODEL_PATH="models/your_custom_model.joblib"
+
+# Start the API with custom model:
+MODEL_PATH="models/my_model.joblib" uvicorn api:app --host 0.0.0.0 --port 8000
+
+# For production with automatic model detection:
+./production_start.sh  # Uses the latest trump_classifier_*.joblib file
+
+# To manually specify a model in production:
+export MODEL_PATH="models/specific_model.joblib"
+./production_start.sh
+```
+
+**Model File Naming Convention**:
+```bash
+# Standard naming pattern for models:
+trump_classifier_YYYYMMDD_HHMMSS.joblib
+
+# Examples:
+trump_classifier_20250907_082520.joblib  # Sept 7, 2025 at 08:25:20
+trump_classifier_20250906_213637.joblib  # Sept 6, 2025 at 21:36:37
+
+# List available models:
+ls -t models/trump_classifier_*.joblib
+
+# Production script automatically uses the newest file
 ```
 
 **Test Model Performance**:

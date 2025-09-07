@@ -26,7 +26,7 @@ from datetime import datetime
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 import uvicorn
@@ -327,8 +327,7 @@ async def lifespan(app: FastAPI):
         model_store['model_path'] = model_path
         logger.info("Model loaded successfully at startup")
         
-        # Initialize database and analytics
-        db.init_db()
+        # Database is automatically initialized when the db instance is created
         logger.info("Database initialized successfully")
         
     except Exception as e:
@@ -356,9 +355,60 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Configure this properly for production
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST"],  # Limit to necessary methods
     allow_headers=["*"],
 )
+
+# Simple rate limiting using collections (in-memory)
+from collections import defaultdict, deque
+import time
+
+rate_limit_storage = defaultdict(deque)
+RATE_LIMIT_CALLS = 100  # requests per minute
+RATE_LIMIT_PERIOD = 60  # seconds
+
+def check_rate_limit(client_ip: str) -> bool:
+    """Simple rate limiting check."""
+    now = time.time()
+    client_requests = rate_limit_storage[client_ip]
+    
+    # Remove old requests
+    while client_requests and client_requests[0] < now - RATE_LIMIT_PERIOD:
+        client_requests.popleft()
+    
+    # Check limit
+    if len(client_requests) >= RATE_LIMIT_CALLS:
+        return False
+    
+    # Add current request
+    client_requests.append(now)
+    return True
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """Add security headers and basic rate limiting."""
+    
+    # Rate limiting check
+    client_ip = get_client_ip(request)
+    if not check_rate_limit(client_ip):
+        logger.warning(f"Rate limit exceeded for {client_ip}")
+        return JSONResponse(
+            status_code=429,
+            content={"error": "Rate limit exceeded. Please try again later."}
+        )
+    
+    response = await call_next(request)
+    
+    # Add security headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["X-Rate-Limit-Remaining"] = str(
+        RATE_LIMIT_CALLS - len(rate_limit_storage[client_ip])
+    )
+    
+    return response
 
 # Mount static files for frontend
 app.mount("/static", StaticFiles(directory="frontend"), name="static")

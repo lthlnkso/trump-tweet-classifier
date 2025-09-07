@@ -95,7 +95,7 @@ class TrumpAnalytics:
             cursor.execute("SELECT COUNT(*) FROM feedback")
             total_feedback = cursor.fetchone()[0]
             
-            cursor.execute("SELECT AVG(CASE WHEN agree THEN 1.0 ELSE 0.0 END) * 100 FROM feedback")
+            cursor.execute("SELECT AVG(CASE WHEN agrees_with_rating THEN 1.0 ELSE 0.0 END) * 100 FROM feedback")
             agreement_rate = cursor.fetchone()[0] or 0
             
             return {
@@ -160,12 +160,12 @@ class TrumpAnalytics:
         """Generate plot showing distribution of Trump levels"""
         with self.get_db_connection() as conn:
             query = """
-            SELECT level, COUNT(*) as count
+            SELECT trump_level as level, COUNT(*) as count
             FROM submissions 
-            WHERE level IS NOT NULL
-            GROUP BY level
+            WHERE trump_level IS NOT NULL
+            GROUP BY trump_level
             ORDER BY 
-                CASE level
+                CASE trump_level
                     WHEN 'CERTIFIED Trump' THEN 6
                     WHEN 'Donald Trump Jr.' THEN 5
                     WHEN 'Eric Trump' THEN 4
@@ -213,7 +213,7 @@ class TrumpAnalytics:
             SELECT 
                 confidence,
                 classification,
-                level,
+                trump_level as level,
                 created_at
             FROM submissions 
             WHERE confidence IS NOT NULL
@@ -407,12 +407,12 @@ class TrumpAnalytics:
             # Get feedback data with submission details
             query = """
             SELECT 
-                f.agree,
-                f.message,
+                f.agrees_with_rating as agree,
+                f.feedback_message as message,
                 f.created_at as feedback_date,
                 s.confidence,
                 s.classification,
-                s.level,
+                s.trump_level as level,
                 s.created_at as submission_date
             FROM feedback f
             JOIN submissions s ON f.submission_id = s.id
@@ -518,7 +518,7 @@ class TrumpAnalytics:
                 is_public,
                 share_hash,
                 share_title,
-                level,
+                trump_level as level,
                 confidence,
                 classification,
                 created_at
@@ -604,3 +604,4 @@ class TrumpAnalytics:
                 self.geoip_db.close()
             except:
                 pass
+

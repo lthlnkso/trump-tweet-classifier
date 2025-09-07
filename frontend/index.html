@@ -468,9 +468,14 @@
         }
         
         .detail-box h6 {
-            color: #ffd700;
+            color: #ffffff;
             margin-bottom: 10px;
             font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
         }
         
         .detail-value {
@@ -483,6 +488,37 @@
             padding: 8px 12px;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Metrics Link Styles */
+        .metrics-link {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            border: 3px solid #ffffff;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            display: inline-block;
+        }
+        
+        .metrics-link:hover {
+            background: linear-gradient(45deg, #ff5252, #ff9800);
+            border-color: #ffff00;
+            color: #ffffff;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9);
+        }
+        
+        .metrics-link:focus {
+            outline: 3px solid #ffff00;
+            outline-offset: 2px;
         }
         
         /* Feedback Section Styles */
@@ -1031,6 +1067,12 @@
                             </button>
                         </div>
                     </form>
+                    
+                    <div class="text-center mt-4 mb-3">
+                        <a href="/metrics" class="btn btn-outline-light btn-sm metrics-link" target="_blank">
+                            <i class="fas fa-chart-bar"></i> View Analytics Dashboard
+                        </a>
+                    </div>
                     
                     <div class="examples">
                         <h5><i class="fas fa-lightbulb"></i> Need inspiration? Try these!</h5>
