@@ -820,6 +820,8 @@ function showUrlForManualCopy(url) {
 }
 
 function quickCopyLink() {
+    console.log('quickCopyLink called, currentShareUrl:', currentShareUrl); // Debug log
+    
     if (!currentShareUrl) {
         alert('No share link available! Please create a share link first.');
         return;
