@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estimate Probability</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 10s ease infinite;
+            height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+        
+        .title {
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleShine 4s ease infinite;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .word-display {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+            animation: wordPulse 3s ease-in-out infinite;
+        }
+        
+        .word-text {
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 0;
+        }
+        
+        .probability-input {
+            border-radius: 15px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            padding: 1rem;
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+        
+        .probability-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+            outline: none;
+            transform: scale(1.02);
+        }
+        
+        .submit-btn {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+        }
+        
+        .submit-btn:hover {
+            background: linear-gradient(45deg, #f5576c, #f093fb);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(245, 87, 108, 0.6);
+        }
+        
+        .home-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .home-btn:hover {
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .instructions {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .progress-counter {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .loading-spinner {
+            display: none;
+        }
+        
+        .success-feedback {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            display: none;
+            animation: successSlide 0.5s ease-out;
+        }
+        
+        .error-feedback {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            color: white;
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes titleShine {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes wordPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        @keyframes successSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .range-display {
+            text-align: center;
+            margin: 1rem 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .percentage-symbol {
+            color: #f5576c;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        /* Slider Styles */
+        .slider-container {
+            padding: 1.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin: 1rem 0;
+        }
+        
+        .slider-track {
+            position: relative;
+            height: 60px;
+            margin: 20px 0;
+        }
+        
+        .slider-background {
+            position: absolute;
+            top: 25px;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: linear-gradient(90deg, #ff4757, #ffa502, #2ed573);
+            border-radius: 5px;
+            opacity: 0.3;
+        }
+        
+        .slider-range {
+            position: absolute;
+            top: 25px;
+            height: 10px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px;
+            opacity: 0.8;
+            transition: all 0.2s ease;
+        }
+        
+        .slider-handle {
+            position: absolute;
+            top: 15px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: grab;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            z-index: 10;
+            user-select: none;
+        }
+        
+        .slider-handle:hover {
+            transform: scale(1.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .slider-handle:active {
+            cursor: grabbing;
+            transform: scale(1.3);
+        }
+        
+        .low-handle {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            border: 2px solid #ff1744;
+        }
+        
+        .mid-handle {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: 2px solid #5a67d8;
+        }
+        
+        .high-handle {
+            background: linear-gradient(135deg, #2ed573, #17a2b8);
+            border: 2px solid #28a745;
+        }
+        
+        .handle-label {
+            position: absolute;
+            top: -25px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .scale-markers {
+            position: absolute;
+            top: 45px;
+            left: 0;
+            right: 0;
+            height: 20px;
+        }
+        
+        .scale-marker {
+            position: absolute;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            transform: translateX(-50%);
+        }
+        
+        .value-display {
+            margin-top: 1rem;
+        }
+        
+        .value-box {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 0.8rem;
+            margin: 0 0.3rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .value-box:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .value-percentage {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .value-box i {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .low-value {
+            border-color: rgba(255, 71, 87, 0.5);
+        }
+        
+        .mid-value {
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+        
+        .high-value {
+            border-color: rgba(46, 213, 115, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid h-100 d-flex align-items-center py-2">
+        <div class="row justify-content-center w-100">
+            <div class="col-12 col-lg-8">
+                <div class="game-container p-3">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <a href="/" class="home-btn">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                        <div class="progress-counter" id="progressCounter">
+                            Loading...
+                        </div>
+                    </div>
+                    
+                    <h1 class="title mb-3" style="font-size: 2rem;">
+                        <i class="fas fa-percentage"></i>
+                        Estimate Probability
+                    </h1>
+                    
+                    <!-- Instructions -->
+                    <div class="instructions">
+                        <h5><i class="fas fa-info-circle"></i> How to Play</h5>
+                        <p class="mb-2">
+                            You'll see a word or phrase that represents a probability level. 
+                            Your job is to estimate the range of probabilities it represents.
+                        </p>
+                        <p class="mb-0">
+                            <strong>Example:</strong> The phrase "X" might represent probabilities between Y% and Z%, with a midpoint around W%.
+                        </p>
+                    </div>
+                    
+                    <!-- Game Area -->
+                    <div id="gameArea">
+                        <!-- Word Display -->
+                        <div class="word-display">
+                            <p class="word-text" id="wordDisplay">Loading...</p>
+                        </div>
+                        
+                        <!-- Probability Range Slider -->
+                        <form id="probabilityForm">
+                            <div class="mb-4">
+                                <label class="form-label text-center d-block">
+                                    <strong>What probability range does this represent?</strong>
+                                </label>
+                                <p class="text-center text-muted mb-3">
+                                    Drag the three handles to set your range on the 0-100% scale
+                                </p>
+                                
+                                <!-- Slider Container -->
+                                <div class="slider-container mb-4">
+                                    <div class="slider-track">
+                                        <!-- Slider background -->
+                                        <div class="slider-background"></div>
+                                        
+                                        <!-- Range highlight -->
+                                        <div class="slider-range" id="sliderRange"></div>
+                                        
+                                        <!-- Handles -->
+                                        <div class="slider-handle low-handle" id="lowHandle" data-value="25">
+                                            <span class="handle-label">Low</span>
+                                        </div>
+                                        <div class="slider-handle mid-handle" id="midHandle" data-value="50">
+                                            <span class="handle-label">Mid</span>
+                                        </div>
+                                        <div class="slider-handle high-handle" id="highHandle" data-value="75">
+                                            <span class="handle-label">High</span>
+                                        </div>
+                                        
+                                        <!-- Scale markers -->
+                                        <div class="scale-markers">
+                                            <span class="scale-marker" style="left: 0%;">0%</span>
+                                            <span class="scale-marker" style="left: 25%;">25%</span>
+                                            <span class="scale-marker" style="left: 50%;">50%</span>
+                                            <span class="scale-marker" style="left: 75%;">75%</span>
+                                            <span class="scale-marker" style="right: 0%;">100%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Value Display -->
+                                <div class="value-display">
+                                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="value-box low-value" onclick="editValue('low')">
+                                <i class="fas fa-arrow-down text-danger"></i>
+                                <strong>Low:</strong>
+                                <span class="value-percentage" id="lowValue">25.0</span>%
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="value-box mid-value" onclick="editValue('mid')">
+                                <i class="fas fa-bullseye text-primary"></i>
+                                <strong>Mid:</strong>
+                                <span class="value-percentage" id="midValue">50.0</span>%
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="value-box high-value" onclick="editValue('high')">
+                                <i class="fas fa-arrow-up text-success"></i>
+                                <strong>High:</strong>
+                                <span class="value-percentage" id="highValue">75.0</span>%
+                            </div>
+                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="range-display">
+                                    Drag the handles to adjust your probability range estimate
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button type="submit" class="btn submit-btn">
+                                    <span class="submit-text">
+                                        <i class="fas fa-check"></i> Submit Answer
+                                    </span>
+                                    <span class="loading-spinner">
+                                        <i class="fas fa-spinner fa-spin"></i> Processing...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Success Feedback -->
+                    <div class="success-feedback" id="successFeedback">
+                        <h4><i class="fas fa-check-circle"></i> Great Job!</h4>
+                        <p class="mb-3">Your answer has been recorded. Ready for the next challenge?</p>
+                        <button type="button" class="btn btn-light btn-lg" onclick="loadNextWord()">
+                            <i class="fas fa-arrow-right"></i> Next Word
+                        </button>
+                    </div>
+                    
+                    <!-- Error Feedback -->
+                    <div class="error-feedback" id="errorFeedback">
+                        <p class="mb-0"><i class="fas fa-exclamation-triangle"></i> <span id="errorMessage">Something went wrong. Please try again.</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentWordId = null;
+        let startTime = null;
+        let responseCount = 0;
+        let userId = null;
+        
+        // Generate a user ID for this session
+        function generateUserId() {
+            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', function() {
+            userId = generateUserId();
+            loadNextWord();
+        });
+        
+        // Load a random word
+        async function loadNextWord() {
+            try {
+                document.getElementById('successFeedback').style.display = 'none';
+                document.getElementById('errorFeedback').style.display = 'none';
+                document.getElementById('gameArea').style.display = 'block';
+                
+                const response = await fetch('/api/estimative/word');
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentWordId = data.word.id;
+                    document.getElementById('wordDisplay').textContent = data.word.word_phrase;
+                    
+                    // Reset slider to default positions
+                    resetSlider();
+                    startTime = Date.now();
+                    
+                    responseCount++;
+                    document.getElementById('progressCounter').textContent = `Response #${responseCount}`;
+                } else {
+                    showError('Failed to load word: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+        
+        // Handle form submission
+        document.getElementById('probabilityForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get values from slider handles
+            const low = parseFloat(document.getElementById('lowHandle').dataset.value);
+            const high = parseFloat(document.getElementById('highHandle').dataset.value);
+            const midpoint = parseFloat(document.getElementById('midHandle').dataset.value);
+            
+            // Basic validation (slider should prevent invalid ranges, but double-check)
+            if (low > midpoint || midpoint > high) {
+                showError('Invalid range detected. Please adjust the slider handles.');
+                return;
+            }
+            
+            const submitBtn = document.querySelector('.submit-btn');
+            const submitText = submitBtn.querySelector('.submit-text');
+            const loadingSpinner = submitBtn.querySelector('.loading-spinner');
+            
+            // Show loading state
+            submitText.style.display = 'none';
+            loadingSpinner.style.display = 'inline';
+            submitBtn.disabled = true;
+            
+            const responseTime = Date.now() - startTime;
+            
+            try {
+                const response = await fetch('/api/estimative/response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        word_id: currentWordId,
+                        user_id: userId,
+                        probability_low: low,
+                        probability_high: high,
+                        probability_midpoint: midpoint,
+                        response_time_ms: responseTime
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess();
+                } else {
+                    showError('Failed to save response: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                // Reset button state
+                submitText.style.display = 'inline';
+                loadingSpinner.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function showSuccess() {
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('successFeedback').style.display = 'block';
+        }
+        
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorFeedback').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('errorFeedback').style.display = 'none';
+            }, 5000);
+        }
+        
+        // Slider functionality
+        let activeHandle = null;
+        let sliderRect = null;
+        
+        function initializeSlider() {
+            const sliderTrack = document.querySelector('.slider-track');
+            const handles = document.querySelectorAll('.slider-handle');
+            
+            // Reset to default positions
+            resetSlider();
+            
+            handles.forEach(handle => {
+                handle.addEventListener('mousedown', startDrag);
+                handle.addEventListener('touchstart', startDrag);
+            });
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchend', endDrag);
+        }
+        
+        function resetSlider() {
+            // Set default positions
+            updateHandle('lowHandle', 25);
+            updateHandle('midHandle', 50);
+            updateHandle('highHandle', 75);
+            updateRangeDisplay();
+        }
+        
+        function startDrag(e) {
+            e.preventDefault();
+            activeHandle = e.target.closest('.slider-handle');
+            sliderRect = document.querySelector('.slider-track').getBoundingClientRect();
+        }
+        
+        function drag(e) {
+            if (!activeHandle || !sliderRect) return;
+            
+            e.preventDefault();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const percentage = Math.min(100, Math.max(0, ((clientX - sliderRect.left) / sliderRect.width) * 100));
+            
+            // Get current values
+            const lowValue = parseFloat(document.getElementById('lowHandle').dataset.value);
+            const midValue = parseFloat(document.getElementById('midHandle').dataset.value);
+            const highValue = parseFloat(document.getElementById('highHandle').dataset.value);
+            
+            // Apply constraints based on which handle is being dragged
+            let constrainedValue = percentage;
+            
+            if (activeHandle.id === 'lowHandle') {
+                // Low handle can't go above mid handle, must be at least 1% less
+                constrainedValue = Math.min(percentage, midValue - 1);
+            } else if (activeHandle.id === 'midHandle') {
+                // Mid handle must stay between low and high, with 1% buffer on each side
+                constrainedValue = Math.min(Math.max(percentage, lowValue + 1), highValue - 1);
+            } else if (activeHandle.id === 'highHandle') {
+                // High handle can't go below mid handle, must be at least 1% more
+                constrainedValue = Math.max(percentage, midValue + 1);
+            }
+            
+            updateHandle(activeHandle.id, constrainedValue);
+            updateRangeDisplay();
+        }
+        
+        function endDrag() {
+            activeHandle = null;
+            sliderRect = null;
+        }
+        
+        function updateHandle(handleId, value) {
+            const handle = document.getElementById(handleId);
+            handle.style.left = value + '%';
+            handle.dataset.value = value.toFixed(1);
+        }
+        
+        function updateRangeDisplay() {
+            const lowValue = parseFloat(document.getElementById('lowHandle').dataset.value);
+            const midValue = parseFloat(document.getElementById('midHandle').dataset.value);
+            const highValue = parseFloat(document.getElementById('highHandle').dataset.value);
+            
+            // Update value displays
+            document.getElementById('lowValue').textContent = lowValue.toFixed(1);
+            document.getElementById('midValue').textContent = midValue.toFixed(1);
+            document.getElementById('highValue').textContent = highValue.toFixed(1);
+            
+            // Update range highlight
+            const rangeElement = document.getElementById('sliderRange');
+            rangeElement.style.left = lowValue + '%';
+            rangeElement.style.width = (highValue - lowValue) + '%';
+        }
+        
+        // Manual value editing
+        function editValue(type) {
+            const currentValue = parseFloat(document.getElementById(type + 'Value').textContent);
+            const newValue = prompt(`Enter new ${type} value (0-100):`, currentValue.toFixed(1));
+            
+            if (newValue === null) return; // User cancelled
+            
+            const numValue = parseFloat(newValue);
+            if (isNaN(numValue) || numValue < 0 || numValue > 100) {
+                alert('Please enter a valid number between 0 and 100.');
+                return;
+            }
+            
+            // Get current values for validation
+            const lowValue = parseFloat(document.getElementById('lowHandle').dataset.value);
+            const midValue = parseFloat(document.getElementById('midHandle').dataset.value);
+            const highValue = parseFloat(document.getElementById('highHandle').dataset.value);
+            
+            // Validate constraints
+            if (type === 'low') {
+                if (numValue >= midValue) {
+                    alert('Low value must be less than mid value.');
+                    return;
+                }
+                updateHandle('lowHandle', numValue);
+            } else if (type === 'mid') {
+                if (numValue <= lowValue || numValue >= highValue) {
+                    alert('Mid value must be between low and high values.');
+                    return;
+                }
+                updateHandle('midHandle', numValue);
+            } else if (type === 'high') {
+                if (numValue <= midValue) {
+                    alert('High value must be greater than mid value.');
+                    return;
+                }
+                updateHandle('highHandle', numValue);
+            }
+            
+            updateRangeDisplay();
+        }
+        
+        // Initialize slider when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSlider();
+        });
+    </script>
+</body>
+</html>

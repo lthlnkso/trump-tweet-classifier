@@ -149,6 +149,42 @@ class Database:
                 cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_share_hash ON submissions(share_hash)")
             except Exception:
                 pass  # Index might already exist
+            
+            # Add Estimative Probability tables
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS estimative_words (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    word_phrase TEXT NOT NULL UNIQUE,
+                    category TEXT,
+                    difficulty_level INTEGER DEFAULT 1,
+                    active BOOLEAN DEFAULT 1,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS estimative_responses (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    word_id INTEGER NOT NULL,
+                    user_id TEXT NOT NULL,
+                    probability_low REAL NOT NULL CHECK (probability_low >= 0 AND probability_low <= 100),
+                    probability_high REAL NOT NULL CHECK (probability_high >= 0 AND probability_high <= 100),
+                    probability_midpoint REAL NOT NULL CHECK (probability_midpoint >= 0 AND probability_midpoint <= 100),
+                    response_time_ms INTEGER,
+                    user_agent TEXT,
+                    user_ip TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (word_id) REFERENCES estimative_words(id),
+                    CHECK (probability_low <= probability_midpoint),
+                    CHECK (probability_midpoint <= probability_high)
+                )
+            """)
+            
+            # Create indexes for estimative probability tables
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_estimative_words_active ON estimative_words(active)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_estimative_responses_word_id ON estimative_responses(word_id)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_estimative_responses_user_id ON estimative_responses(user_id)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_estimative_responses_created_at ON estimative_responses(created_at)")
     
     def log_submission(self, 
                       user_ip: str,
@@ -322,6 +358,82 @@ class Database:
         """Close database connections."""
         if hasattr(self._local, 'connection'):
             self._local.connection.close()
+    
+    def add_estimative_word(self, word_phrase: str, category: str = None, difficulty_level: int = 1) -> int:
+        """Add a new estimative word/phrase."""
+        with self.get_cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO estimative_words (word_phrase, category, difficulty_level)
+                VALUES (?, ?, ?)
+            """, (word_phrase, category, difficulty_level))
+            return cursor.lastrowid
+    
+    def get_random_estimative_word(self) -> Optional[Dict[str, Any]]:
+        """Get a random active estimative word."""
+        with self.get_cursor() as cursor:
+            cursor.execute("""
+                SELECT id, word_phrase, category, difficulty_level
+                FROM estimative_words 
+                WHERE active = 1 
+                ORDER BY RANDOM() 
+                LIMIT 1
+            """)
+            row = cursor.fetchone()
+            return dict(row) if row else None
+    
+    def log_estimative_response(self, word_id: int, user_id: str, probability_low: float,
+                               probability_high: float, probability_midpoint: float,
+                               response_time_ms: int = None, user_agent: str = None, 
+                               user_ip: str = None) -> int:
+        """Log an estimative probability response with range values."""
+        with self.get_cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO estimative_responses 
+                (word_id, user_id, probability_low, probability_high, probability_midpoint, response_time_ms, user_agent, user_ip)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (word_id, user_id, probability_low, probability_high, probability_midpoint, response_time_ms, user_agent, user_ip))
+            return cursor.lastrowid
+    
+    def get_estimative_responses_csv(self) -> List[Dict[str, Any]]:
+        """Get all estimative responses for CSV export."""
+        with self.get_cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    er.id,
+                    ew.word_phrase,
+                    er.user_id,
+                    er.probability_low,
+                    er.probability_high,
+                    er.probability_midpoint,
+                    er.response_time_ms,
+                    er.user_agent,
+                    er.user_ip,
+                    er.created_at
+                FROM estimative_responses er
+                JOIN estimative_words ew ON er.word_id = ew.id
+                ORDER BY er.created_at DESC
+            """)
+            return [dict(row) for row in cursor.fetchall()]
+    
+    def get_estimative_stats(self) -> Dict[str, Any]:
+        """Get statistics for estimative probability responses."""
+        with self.get_cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    COUNT(*) as total_responses,
+                    COUNT(DISTINCT user_id) as unique_users,
+                    COUNT(DISTINCT word_id) as words_answered,
+                    AVG(probability_midpoint) as avg_probability,
+                    AVG(probability_low) as avg_low,
+                    AVG(probability_high) as avg_high,
+                    AVG(probability_high - probability_low) as avg_range_width,
+                    MIN(probability_low) as min_probability,
+                    MAX(probability_high) as max_probability,
+                    AVG(response_time_ms) as avg_response_time
+                FROM estimative_responses
+            """)
+            row = cursor.fetchone()
+            return dict(row) if row else {}
 
 
 # Global database instance

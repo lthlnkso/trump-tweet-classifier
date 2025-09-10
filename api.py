@@ -117,7 +117,27 @@ class ModelInfo(BaseModel):
     model_name: str = Field(description="Name of the loaded model")
     training_timestamp: str = Field(description="When the model was trained")
     model_path: str = Field(description="Path to the model file")
-    vector_dimensions: int = Field(description="Dimensionality of text embeddings")
+
+class EstimativeWordResponse(BaseModel):
+    """Response model for estimative word."""
+    success: bool = Field(description="Whether the request was successful")
+    word: Dict[str, Any] = Field(description="Word data including id, word_phrase, category")
+    message: str = Field(description="Status message")
+
+class EstimativeResponseRequest(BaseModel):
+    """Request model for submitting an estimative probability response."""
+    word_id: int = Field(description="ID of the word being responded to")
+    user_id: str = Field(description="Unique user identifier")
+    probability_low: float = Field(description="Lower bound of probability range (0-100)", ge=0, le=100)
+    probability_high: float = Field(description="Upper bound of probability range (0-100)", ge=0, le=100)
+    probability_midpoint: float = Field(description="Midpoint of probability range (0-100)", ge=0, le=100)
+    response_time_ms: Optional[int] = Field(None, description="Response time in milliseconds")
+
+class EstimativeResponseResponse(BaseModel):
+    """Response model for estimative probability submission."""
+    success: bool = Field(description="Whether the response was recorded successfully")
+    response_id: int = Field(description="Unique ID for the response record")
+    message: str = Field(description="Confirmation message")
 
 def load_model(model_path: str) -> Dict[str, Any]:
     """
@@ -415,8 +435,18 @@ app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 @app.get("/")
 async def root():
-    """Serve the frontend application."""
+    """Serve the main portfolio homepage."""
+    return FileResponse('frontend/homepage.html')
+
+@app.get("/trump")
+async def trump_challenge():
+    """Serve the Trump Tweet Challenge page."""
     return FileResponse('frontend/index.html')
+
+@app.get("/estimative")
+async def estimative_probability():
+    """Serve the Estimative Probability page."""
+    return FileResponse('frontend/estimative.html')
 
 @app.get("/api", response_model=Dict[str, str])
 async def api_info():
@@ -726,6 +756,205 @@ async def get_admin_stats():
     except Exception as e:
         logger.error(f"Error getting admin stats: {e}")
         raise HTTPException(status_code=500, detail="Failed to get statistics")
+
+# Estimative Probability Endpoints
+
+@app.get("/api/estimative/word", response_model=EstimativeWordResponse)
+async def get_random_estimative_word(request: Request):
+    """Get a random estimative probability word/phrase."""
+    try:
+        # Log request
+        client_ip = get_client_ip(request)
+        logger.info(f"Estimative word request from {client_ip}")
+        
+        word = db.get_random_estimative_word()
+        if not word:
+            return EstimativeWordResponse(
+                success=False,
+                word={},
+                message="No words available. Please contact administrator."
+            )
+        
+        return EstimativeWordResponse(
+            success=True,
+            word=word,
+            message="Word retrieved successfully"
+        )
+        
+    except Exception as e:
+        logger.error(f"Get estimative word failed: {e}")
+        return EstimativeWordResponse(
+            success=False,
+            word={},
+            message="Failed to retrieve word"
+        )
+
+@app.post("/api/estimative/response", response_model=EstimativeResponseResponse)
+async def submit_estimative_response(
+    request_data: EstimativeResponseRequest,
+    request: Request
+):
+    """Submit a probability estimate response."""
+    try:
+        client_ip = get_client_ip(request)
+        user_agent = request.headers.get("user-agent", "Unknown")
+        
+        # Log request  
+        logger.info(f"Estimative response submission from {client_ip}: word_id={request_data.word_id}, range={request_data.probability_low}-{request_data.probability_high}, mid={request_data.probability_midpoint}")
+        
+        # Log the response to database
+        response_id = db.log_estimative_response(
+            word_id=request_data.word_id,
+            user_id=request_data.user_id,
+            probability_low=request_data.probability_low,
+            probability_high=request_data.probability_high,
+            probability_midpoint=request_data.probability_midpoint,
+            response_time_ms=request_data.response_time_ms,
+            user_agent=user_agent,
+            user_ip=client_ip
+        )
+        
+        return EstimativeResponseResponse(
+            success=True,
+            response_id=response_id,
+            message="Response recorded successfully"
+        )
+        
+    except Exception as e:
+        logger.error(f"Submit estimative response failed: {e}")
+        return EstimativeResponseResponse(
+            success=False,
+            response_id=0,
+            message="Failed to record response"
+        )
+
+@app.get("/api/estimative/download")
+async def download_estimative_responses(request: Request):
+    """Download all estimative responses as CSV."""
+    try:
+        # Log request
+        client_ip = get_client_ip(request)
+        logger.info(f"Estimative responses download from {client_ip}")
+        
+        responses = db.get_estimative_responses_csv()
+        
+        # Create CSV content
+        import csv
+        import io
+        
+        output = io.StringIO()
+        if responses:
+            fieldnames = responses[0].keys()
+            writer = csv.DictWriter(output, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(responses)
+        else:
+            # Empty CSV with headers
+            fieldnames = ['id', 'word_phrase', 'user_id', 'probability_low', 'probability_high', 'probability_midpoint', 'response_time_ms', 'user_agent', 'user_ip', 'created_at']
+            writer = csv.DictWriter(output, fieldnames=fieldnames)
+            writer.writeheader()
+        
+        csv_content = output.getvalue()
+        output.close()
+        
+        # Return as downloadable file
+        from fastapi.responses import Response
+        return Response(
+            content=csv_content,
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=estimative_responses.csv"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Download estimative responses failed: {e}")
+        raise HTTPException(status_code=500, detail="Download temporarily unavailable")
+
+@app.get("/estimative/stats")
+async def estimative_stats_page(request: Request):
+    """Simple stats page for estimative probability responses."""
+    try:
+        stats = db.get_estimative_stats()
+        
+        # Simple HTML response with stats
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Estimative Probability Stats</title>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        </head>
+        <body class="bg-light">
+            <div class="container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-chart-bar"></i> Estimative Probability Statistics</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5>Response Statistics</h5>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <strong>Total Responses:</strong> 
+                                                <span>{stats.get('total_responses', 0)}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <strong>Unique Users:</strong> 
+                                                <span>{stats.get('unique_users', 0)}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <strong>Words Answered:</strong> 
+                                                <span>{stats.get('words_answered', 0)}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5>Probability Statistics</h5>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <strong>Avg Midpoint:</strong> 
+                                                <span>{stats.get('avg_probability', 0):.1f}%</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <strong>Avg Range Width:</strong> 
+                                                <span>{stats.get('avg_range_width', 0):.1f}%</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <strong>Min-Max:</strong> 
+                                                <span>{stats.get('min_probability', 0):.1f}% - {stats.get('max_probability', 0):.1f}%</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                <strong>Avg Response Time:</strong> 
+                                                <span>{stats.get('avg_response_time', 0):.0f}ms</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-4">
+                                    <a href="/api/estimative/download" class="btn btn-primary">
+                                        <i class="fas fa-download"></i> Download CSV
+                                    </a>
+                                    <a href="/" class="btn btn-secondary">
+                                        <i class="fas fa-home"></i> Back to Portfolio
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        return HTMLResponse(content=html_content)
+        
+    except Exception as e:
+        logger.error(f"Estimative stats page error: {e}")
+        raise HTTPException(status_code=500, detail="Stats temporarily unavailable")
 
 @app.get("/metrics", response_class=HTMLResponse)
 async def metrics_dashboard(request: Request):

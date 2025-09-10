@@ -2,6 +2,20 @@
 
 This document describes the technical architecture, patterns, and implementation details of the Trump Tweet Classifier project. Use this as your guide for understanding, maintaining, and extending the codebase.
 
+## ⚠️ **IMPORTANT - PRODUCTION SERVER WARNING**
+
+**🚨 CRITICAL: The website is currently RUNNING IN PRODUCTION on this box on port 8000! 🚨**
+
+**DO NOT run the production script (`production_start.sh`) or any production version without explicit instruction!**
+
+**For ALL development work, use the development server which runs on port 8001:**
+```bash
+./start_dev.sh
+```
+
+**Development server:** http://localhost:8001  
+**Production server:** http://localhost:8000 (DO NOT TOUCH!)
+
 ## 📋 Table of Contents
 
 1. [Project Overview](#project-overview)
@@ -696,6 +710,24 @@ python3 train_classifier.py --classifier logistic --no-features
 
 # Compare results
 python3 compare_models.py
+```
+
+**Model Comparison**:
+```bash
+# Compare different model types systematically:
+python compare_models.py --data test_subset.csv
+
+# Run individual comparisons:
+python compare_models.py --data test_subset.csv --single xgboost true
+python compare_models.py --data test_subset.csv --single logistic false
+
+# Manual comparison using predict.py:
+python predict.py --model models/logistic_model.joblib "test tweet"
+python predict.py --model models/xgboost_model.joblib "test tweet"
+
+# Train specific model types for comparison:
+python train_classifier.py --data test_subset.csv --classifier logistic --model-name logistic_comparison
+python train_classifier.py --data test_subset.csv --classifier xgboost --model-name xgboost_comparison
 ```
 
 **Model Configuration**:

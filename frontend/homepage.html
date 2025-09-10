@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Projects Portfolio</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .portfolio-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .portfolio-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+        
+        .main-title {
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleShine 4s ease infinite;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .project-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .project-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .project-btn:hover {
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .coming-soon {
+            opacity: 0.7;
+            position: relative;
+        }
+        
+        .coming-soon::after {
+            content: 'Coming Soon!';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #f5576c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        @keyframes titleShine {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .footer-note {
+            text-align: center;
+            margin-top: 3rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="main-title display-3">
+            <i class="fas fa-brain"></i>
+            AI Projects Portfolio
+            <i class="fas fa-robot"></i>
+        </h1>
+        
+        <div class="row g-4">
+            <!-- Trump Tweet Challenge -->
+            <div class="col-md-6">
+                <div class="portfolio-card p-4 h-100 text-center">
+                    <div class="project-icon">
+                        <i class="fas fa-flag-usa"></i>
+                    </div>
+                    <h3 class="mb-3">Trump Tweet Challenge</h3>
+                    <p class="text-muted mb-4">
+                        Think you can match the 45th-47th President's writing style? 
+                        Test your political posting prowess with our AI-powered classifier!
+                    </p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <a href="/trump" class="project-btn">
+                            <i class="fas fa-paper-plane"></i> Try Challenge
+                        </a>
+                        <a href="/metrics" class="btn btn-outline-secondary" target="_blank">
+                            <i class="fas fa-chart-bar"></i> View Stats
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Estimative Probability -->
+            <div class="col-md-6">
+                <div class="portfolio-card p-4 h-100 text-center">
+                    <div class="project-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <h3 class="mb-3">Estimative Probability</h3>
+                    <p class="text-muted mb-4">
+                        How well do you understand probability phrases? 
+                        Test your calibration with words like "quite certain" or "very likely"!
+                    </p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <a href="/estimative" class="project-btn">
+                            <i class="fas fa-dice"></i> Play Game
+                        </a>
+                        <a href="/estimative/stats" class="btn btn-outline-secondary" target="_blank">
+                            <i class="fas fa-chart-line"></i> View Data
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-note">
+            <p>
+                <i class="fas fa-lightbulb"></i>
+                More AI experiments and tools coming soon! Built with FastAPI, ML models, and lots of ☕
+            </p>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

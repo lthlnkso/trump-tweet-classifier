@@ -57,7 +57,7 @@ class TrumpAnalytics:
                     break
             
             if not self.geoip_db:
-                logger.warning("GeoIP database not found. Geographic analysis will be limited.")
+                logger.info("GeoIP database not found. Geographic analysis will be limited.")
                 
         except Exception as e:
             logger.warning(f"Could not load GeoIP database: {e}")
@@ -138,7 +138,7 @@ class TrumpAnalytics:
             
             # Create heatmap
             plt.subplot(2, 1, 1)
-            sns.heatmap(pivot_df.T, annot=True, fmt='d', cmap='YlOrRd', cbar_kws={'label': 'Submissions'})
+            sns.heatmap(pivot_df.T, annot=True, fmt='.0f', cmap='YlOrRd', cbar_kws={'label': 'Submissions'})
             plt.title(f'Submissions Heatmap - Last {days} Days', fontsize=16, fontweight='bold')
             plt.ylabel('Date')
             plt.xlabel('Hour of Day')
@@ -440,20 +440,30 @@ class TrumpAnalytics:
         
         # Agreement by confidence level
         plt.subplot(2, 3, 2)
-        conf_bins = pd.cut(df['confidence'], bins=[0, 0.5, 0.7, 0.9, 1.0], labels=['Low', 'Medium', 'High', 'Very High'])
-        agreement_by_conf = df.groupby(conf_bins)['agree'].mean() * 100
-        
-        bars = plt.bar(agreement_by_conf.index, agreement_by_conf.values, color=['red', 'orange', 'lightgreen', 'green'])
-        plt.title('Agreement Rate by Confidence Level', fontweight='bold')
-        plt.xlabel('Confidence Level')
-        plt.ylabel('Agreement Rate (%)')
-        plt.ylim(0, 100)
-        
-        # Add value labels
-        for bar in bars:
-            height = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width()/2., height + 1,
-                    f'{height:.1f}%', ha='center', va='bottom')
+        try:
+            conf_bins = pd.cut(df['confidence'], bins=[0, 0.5, 0.7, 0.9, 1.0], labels=['Low', 'Medium', 'High', 'Very High'])
+            agreement_by_conf = df.groupby(conf_bins, observed=True)['agree'].mean() * 100
+            
+            if not agreement_by_conf.empty:
+                bars = plt.bar(range(len(agreement_by_conf)), agreement_by_conf.values, 
+                             color=['red', 'orange', 'lightgreen', 'green'][:len(agreement_by_conf)])
+                plt.xticks(range(len(agreement_by_conf)), agreement_by_conf.index)
+                plt.title('Agreement Rate by Confidence Level', fontweight='bold')
+                plt.xlabel('Confidence Level')
+                plt.ylabel('Agreement Rate (%)')
+                plt.ylim(0, 100)
+                
+                # Add value labels
+                for i, (bar, value) in enumerate(zip(bars, agreement_by_conf.values)):
+                    plt.text(bar.get_x() + bar.get_width()/2., value + 1,
+                            f'{value:.1f}%', ha='center', va='bottom')
+            else:
+                plt.text(0.5, 0.5, 'No data available', ha='center', va='center', transform=plt.gca().transAxes)
+                plt.title('Agreement Rate by Confidence Level', fontweight='bold')
+        except Exception as e:
+            logger.warning(f"Failed to create confidence level plot: {e}")
+            plt.text(0.5, 0.5, 'Chart unavailable', ha='center', va='center', transform=plt.gca().transAxes)
+            plt.title('Agreement Rate by Confidence Level', fontweight='bold')
         
         # Agreement by Trump level
         plt.subplot(2, 3, 3)
@@ -564,7 +574,15 @@ class TrumpAnalytics:
         plt.subplot(2, 2, 4)
         total_shares = len(df)
         avg_conf_shared = df['confidence'].mean()
-        trump_share_rate = (df['classification'].sum() / len(df)) * 100
+        
+        # Convert classification to numeric for calculation
+        try:
+            trump_classifications = pd.to_numeric(df['classification'], errors='coerce').fillna(0)
+            trump_share_rate = (trump_classifications.sum() / len(df)) * 100 if len(df) > 0 else 0
+        except Exception:
+            # Fallback: count 'Trump' strings
+            trump_count = (df['classification'] == 'Trump').sum() if 'classification' in df.columns else 0
+            trump_share_rate = (trump_count / len(df)) * 100 if len(df) > 0 else 0
         
         plt.text(0.5, 0.5, f'Total Shares: {total_shares}\n\n'
                           f'Avg Confidence (Shared): {avg_conf_shared:.2f}\n\n'

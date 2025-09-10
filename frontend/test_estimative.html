@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Estimative API</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1>Estimative API Test Page</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Test Get Random Word</h5>
+                    </div>
+                    <div class="card-body">
+                        <button id="testWordBtn" class="btn btn-primary">Get Random Word</button>
+                        <pre id="wordResult" class="mt-3 bg-dark text-light p-3"></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Test Submit Response</h5>
+                    </div>
+                    <div class="card-body">
+                        <input type="number" id="wordId" placeholder="Word ID" class="form-control mb-2">
+                        <p class="text-muted">The main page now uses a visual slider interface! Test values here:</p>
+                        <input type="number" id="probabilityLow" placeholder="Low (0-100)" class="form-control mb-2">
+                        <input type="number" id="probabilityHigh" placeholder="High (0-100)" class="form-control mb-2">
+                        <input type="number" id="probabilityMidpoint" placeholder="Midpoint (0-100)" class="form-control mb-2">
+                        <button id="testResponseBtn" class="btn btn-success">Submit Range Response</button>
+                        <pre id="responseResult" class="mt-3 bg-dark text-light p-3"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <a href="/" class="btn btn-secondary">Back to Portfolio</a>
+            <a href="/estimative" class="btn btn-info">Go to Estimative Game</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('testWordBtn').addEventListener('click', async function() {
+            const resultDiv = document.getElementById('wordResult');
+            resultDiv.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch('/api/estimative/word');
+                const data = await response.json();
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+                
+                // Auto-fill word ID if successful
+                if (data.success && data.word && data.word.id) {
+                    document.getElementById('wordId').value = data.word.id;
+                }
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        document.getElementById('testResponseBtn').addEventListener('click', async function() {
+            const resultDiv = document.getElementById('responseResult');
+            const wordId = document.getElementById('wordId').value;
+            const probabilityLow = document.getElementById('probabilityLow').value;
+            const probabilityHigh = document.getElementById('probabilityHigh').value;
+            const probabilityMidpoint = document.getElementById('probabilityMidpoint').value;
+            
+            if (!wordId || !probabilityLow || !probabilityHigh || !probabilityMidpoint) {
+                resultDiv.textContent = 'Please fill in all fields: Word ID, Low, High, and Midpoint';
+                return;
+            }
+            
+            resultDiv.textContent = 'Submitting...';
+            
+            try {
+                const response = await fetch('/api/estimative/response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        word_id: parseInt(wordId),
+                        user_id: 'test_user_' + Date.now(),
+                        probability_low: parseFloat(probabilityLow),
+                        probability_high: parseFloat(probabilityHigh),
+                        probability_midpoint: parseFloat(probabilityMidpoint),
+                        response_time_ms: 5000
+                    })
+                });
+                
+                const data = await response.json();
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

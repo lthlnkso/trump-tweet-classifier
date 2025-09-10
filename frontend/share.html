@@ -22,7 +22,7 @@
     <!-- Dynamic OpenGraph tags will be injected by server -->
     <meta property="og:title" content="{{og_title}}">
     <meta property="og:description" content="{{og_description}}">
-    <meta property="og:image" content="{{og_image}}">
+    <meta property="og:image" content="/static/images/trump-thumbs-up.png">
     <meta property="og:url" content="{{og_url}}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Trump Tweet Challenge">
@@ -63,7 +63,7 @@
             background-size: 400% 400%;
             animation: gradientShift 8s ease infinite;
             height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
         }
         
         .share-container {
@@ -71,67 +71,125 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2vh 2vw;
+            padding: 4vh 4vw;
             box-sizing: border-box;
         }
         
-        .share-card {
+            .share-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 25px;
             padding: 3vh 4vw;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             border: 3px solid rgba(255, 255, 255, 0.6);
-            max-width: min(600px, 90vw);
-            max-height: 96vh;
+            max-width: min(1200px, 92vw);
             width: 100%;
-            text-align: center;
+            height: 92vh;
             animation: cardFloat 6s ease-in-out infinite;
-            overflow-y: auto;
+            overflow: hidden;
             box-sizing: border-box;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr auto auto;
+            gap: 1.5rem;
+            align-items: center;
         }
         
-        .share-title {
-            font-size: clamp(1.8rem, 5vw, 2.5rem);
-            font-weight: 900;
-            background: linear-gradient(135deg, #ff6b6b, #ffa500, #32cd32, #1e90ff, #ff1493);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: titleRainbow 3s ease infinite;
-            margin-bottom: clamp(15px, 3vh, 25px);
+        .header-section {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 0;
+        }
+        
+        .quote-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-right: 2rem;
+        }
+        
+        .score-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .stats-section {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin: 0;
+        }
+        
+        .button-section {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin: 0;
         }
         
         .score-display {
-            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-size: clamp(3rem, 6vw, 5rem);
             font-weight: 900;
             color: #ffd700;
             text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-            margin: clamp(15px, 3vh, 25px) 0;
+            margin: 1.5rem 0;
             animation: scoreGlow 2s ease-in-out infinite alternate;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
+            border-radius: 50%;
+            width: 200px;
+            height: 200px;
+            margin: 1.5rem auto;
+            border: 4px solid rgba(255, 215, 0, 0.3);
         }
         
         .trump-level-display {
-            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            font-size: clamp(1.3rem, 3vw, 1.6rem);
             font-weight: bold;
             color: #333;
-            margin: clamp(15px, 3vh, 25px) 0;
-            padding: clamp(10px, 2vh, 18px);
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 105, 180, 0.2));
-            border-radius: 15px;
-            border: 2px solid rgba(255, 215, 0, 0.5);
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 105, 180, 0.3));
+            border-radius: 20px;
+            border: 3px solid rgba(255, 215, 0, 0.5);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.2);
         }
         
         .original-text {
-            background: rgba(255, 255, 255, 0.8);
-            border: 2px solid rgba(255, 215, 0, 0.3);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid rgba(255, 215, 0, 0.4);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin: 0;
             font-style: italic;
-            color: #555;
-            line-height: 1.6;
+            color: #333;
+            line-height: 1.8;
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            text-align: left;
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
+            position: relative;
+        }
+        
+        .original-text::before {
+            content: '"';
+            font-size: 4rem;
+            color: rgba(255, 215, 0, 0.6);
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            font-family: Georgia, serif;
+        }
+        
+        .original-text::after {
+            content: '"';
+            font-size: 4rem;
+            color: rgba(255, 215, 0, 0.6);
+            position: absolute;
+            bottom: -20px;
+            right: 15px;
+            font-family: Georgia, serif;
         }
         
         .share-buttons {
@@ -267,54 +325,50 @@
         /* Responsive Design */
         @media (max-width: 768px) {
             .share-container {
-                padding: 1vh 1vw;
+                padding: 2vh 2vw;
             }
             
             .share-card {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto auto;
+                gap: 1rem;
                 padding: 2vh 3vw;
-                max-height: 98vh;
-                border-radius: 15px;
+                height: 96vh;
+                max-width: 95vw;
             }
             
-            .share-title {
-                font-size: max(1.8rem, 4vw);
-                margin-bottom: 1.5vh;
+            .quote-section {
+                padding-right: 0;
+                order: 1;
             }
             
-            .score-display {
-                font-size: max(2.5rem, 8vw);
-                margin: 1.5vh 0;
+            .score-section {
+                order: 2;
             }
             
-            .trump-level-display {
-                font-size: max(1.2rem, 3.5vw);
-                padding: 1vh;
-                margin: 1.5vh 0;
+            .stats-section {
+                order: 3;
+            }
+            
+            .button-section {
+                order: 4;
             }
             
             .original-text {
-                padding: 1.5vh;
-                margin: 1.5vh 0;
-                font-size: max(0.9rem, 3vw);
+                padding: 1.5rem;
+                font-size: 1rem;
+                text-align: center;
             }
             
-            .share-buttons {
-                margin-top: 2vh;
+            .score-display {
+                width: 150px;
+                height: 150px;
+                font-size: 2.5rem;
             }
             
-            .share-btn {
-                margin: 0.5vh;
-                padding: 1vh 2vw;
-                font-size: max(0.9rem, 3vw);
-            }
-            
-            .try-yourself {
-                margin-top: 2vh;
-            }
-            
-            .btn-challenge {
-                font-size: max(1rem, 3.5vw);
-                padding: 1.5vh 3vw;
+            .trump-level-display {
+                font-size: 1.1rem;
+                padding: 1rem;
             }
         }
         
@@ -355,73 +409,85 @@
 <body>
     <div class="share-container">
         <div class="share-card">
-            <!-- Trump Challenge Logo/Image -->
-            <div class="mb-4">
-                <img src="/static/images/TrumpChallenge.png" alt="Trump Challenge" style="max-width: 150px; border-radius: 15px; animation: imageFloat 3s ease-in-out infinite;">
+            <!-- Header Section -->
+            <div class="header-section">
+                <img src="/static/images/TrumpChallenge.png" alt="Trump Challenge" style="max-width: 120px; border-radius: 15px; animation: imageFloat 3s ease-in-out infinite;">
             </div>
             
-            <h1 class="share-title">🎯 Trump Score Reveal!</h1>
-            
-            <div class="score-display">{{trump_score}}%</div>
-            
-            <div class="trump-level-display">
-                {{trump_level}}
+            <!-- Quote Section (Left) -->
+            <div class="quote-section">
+                <div class="original-text">
+                    {{text_content}}
+                </div>
             </div>
             
-            <!-- Prominent Try Challenge Section -->
-            <div class="try-yourself-prominent" style="
-                background: linear-gradient(135deg, #ff6b6b, #ffa500);
-                border-radius: 20px;
-                padding: 25px;
-                margin: 25px 0;
-                text-align: center;
-                box-shadow: 0 15px 30px rgba(255, 107, 107, 0.3);
-                border: 3px solid rgba(255, 255, 255, 0.8);
-                animation: challengePulse 2s ease-in-out infinite;
-            ">
-                <h3 style="color: white; font-weight: 900; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
-                    <i class="fas fa-fire"></i> Think You Can Beat This Score? <i class="fas fa-fire"></i>
-                </h3>
-                <p style="color: rgba(255,255,255,0.95); margin-bottom: 20px; font-size: 1.1rem;">
-                    Challenge yourself and see if you can post more like Trump!
-                </p>
-                <a href="/" class="btn" style="
-                    background: white;
-                    color: #ff6b6b;
-                    font-weight: bold;
-                    font-size: 1.2rem;
-                    padding: 15px 30px;
-                    border-radius: 50px;
-                    text-decoration: none;
-                    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-                    transition: all 0.3s ease;
-                    display: inline-block;
-                " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 12px 25px rgba(0,0,0,0.3)'" 
-                   onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)'">
-                    <i class="fas fa-rocket"></i> TAKE THE CHALLENGE!
-                </a>
-            </div>
-            
-            <div class="original-text">
-                "{{text_content}}"
-            </div>
-            
-            <div class="result-details">
-                <div class="row">
-                    <div class="col-6">
-                        <strong>Classification:</strong><br>
-                        <span style="color: {{prediction_color}};">{{classification}}</span>
-                    </div>
-                    <div class="col-6">
-                        <strong>Confidence:</strong><br>
-                        <span style="color: #007bff;">{{confidence}}%</span>
+            <!-- Score Section (Right) -->
+            <div class="score-section">
+                <div class="score-display">{{trump_score}}%</div>
+                
+                <div class="trump-level-display">
+                    {{trump_level}}
+                </div>
+                
+                <div class="result-details" style="margin-top: 2rem;">
+                    <div class="row" style="text-align: center;">
+                        <div class="col-6">
+                            <div style="background: rgba(255,255,255,0.8); padding: 1rem; border-radius: 15px; margin: 0.5rem;">
+                                <strong>Classification:</strong><br>
+                                <span style="color: {{prediction_color}}; font-size: 1.2rem; font-weight: bold;">{{classification}}</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="background: rgba(255,255,255,0.8); padding: 1rem; border-radius: 15px; margin: 0.5rem;">
+                                <strong>Confidence:</strong><br>
+                                <span style="color: #007bff; font-size: 1.2rem; font-weight: bold;">{{confidence}}%</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             
+            <!-- Stats Section -->
+            <div class="stats-section">
+                <div class="stats-footer" style="margin: 0; font-size: 0.85rem; color: #666;">
+                    Created {{created_date}} • Join thousands testing their Trump tweeting skills!
+                </div>
+            </div>
             
-            <div class="stats-footer">
-                Created {{created_date}} • Join thousands testing their Trump tweeting skills!
+            <!-- Button Section -->
+            <div class="button-section">
+                <div class="try-yourself-prominent" style="
+                    background: linear-gradient(135deg, #ff6b6b, #ffa500);
+                    border-radius: 20px;
+                    padding: 1.5rem;
+                    margin: 0;
+                    text-align: center;
+                    box-shadow: 0 15px 30px rgba(255, 107, 107, 0.3);
+                    border: 3px solid rgba(255, 255, 255, 0.8);
+                    animation: challengePulse 2s ease-in-out infinite;
+                ">
+                    <h3 style="color: white; font-weight: 900; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); font-size: 1.3rem;">
+                        <i class="fas fa-fire"></i> Think You Can Beat This Score? <i class="fas fa-fire"></i>
+                    </h3>
+                    <p style="color: rgba(255,255,255,0.95); margin-bottom: 15px; font-size: 1rem;">
+                        Challenge yourself and see if you can post more like Trump!
+                    </p>
+                    <a href="/" class="btn" style="
+                        background: white;
+                        color: #ff6b6b;
+                        font-weight: bold;
+                        font-size: 1.1rem;
+                        padding: 12px 25px;
+                        border-radius: 50px;
+                        text-decoration: none;
+                        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+                        transition: all 0.3s ease;
+                        display: inline-block;
+                    " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 12px 25px rgba(0,0,0,0.3)'" 
+                       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)'">
+                        <i class="fas fa-rocket"></i> TAKE THE CHALLENGE!
+                    </a>
+                </div>
             </div>
         </div>
     </div>
